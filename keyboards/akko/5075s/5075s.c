@@ -16,6 +16,9 @@
 
 #include "quantum.h"
 #include "gpio.h"
+#include "deferred_exec.h"
+#include "5075s.h"
+
 // clang-format off
 #ifdef RGB_MATRIX_ENABLE
 
@@ -142,9 +145,42 @@ const snled27351_led_t PROGMEM g_snled27351_leds[SNLED27351_LED_COUNT] = {
     {1, J_10,  K_10,  L_10},
     {1, J_11,  K_11,  L_11},
 };
-
 #endif
 // clang-format on
+
+static deferred_token enable_mac_layer_token = INVALID_DEFERRED_TOKEN;
+static int target_layer = 99;
+
+uint32_t enable_mac_layer(uint32_t trigger_time, void *cb_arg) {
+    set_single_default_layer(*((int *)cb_arg));
+    target_layer = 99;
+    return 0;
+}
+
+void switch_mac_layer(bool pressed, bool enable) {
+    if (pressed) {
+        target_layer = enable ? 3 : 0;
+        enable_mac_layer_token = defer_exec(1000, enable_mac_layer, &target_layer);
+    } else {
+        if (enable_mac_layer_token != INVALID_DEFERRED_TOKEN) {
+            cancel_deferred_exec(enable_mac_layer_token);
+        }
+    }
+}
+
+bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case EN_MACL:
+            switch_mac_layer(record->event.pressed, true);
+            return false;
+        case DIS_MAC:
+            switch_mac_layer(record->event.pressed, false);
+            return false;
+        default:
+            return true; // Process all other keycodes normally
+    }
+}
+
 void keyboard_pre_init_kb(void) {
     // set our LED pings as output
     setPinOutput(LED_MAC_OS_PIN);// LED2 MAC/WIN
@@ -163,20 +199,20 @@ void housekeeping_task_kb(void) {
     writePin(LED_WIN_LOCK_PIN, keymap_config.no_gui);
 }
 
-bool dip_switch_update_kb(uint8_t index, bool active) {
-    if (!dip_switch_update_user(index, active)) {
-        return false;
-    }
-    switch (index) {
-        case 0:
-            if (active) {
-                set_single_persistent_default_layer(3);
-            } else {
-                set_single_persistent_default_layer(0);
-            }
-            break;
-        default:
-            break;
-    }
-    return true;
-}
+// bool dip_switch_update_kb(uint8_t index, bool active) {
+//     if (!dip_switch_update_user(index, active)) {
+//         return false;
+//     }
+//     switch (index) {
+//         case 0:
+//             if (active) {
+//                 set_single_persistent_default_layer(3);
+//             } else {
+//                 set_single_persistent_default_layer(0);
+//             }
+//             break;
+//         default:
+//             break;
+//     }
+//     return true;
+// }

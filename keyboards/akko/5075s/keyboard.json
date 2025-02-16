@@ -29,6 +29,7 @@
         "bootmagic": true,
         "command": false,
         "console": false,
+        "deferred_exec": true,
         "dip_switch": true,
         "encoder": true,
         "extrakey": true,
