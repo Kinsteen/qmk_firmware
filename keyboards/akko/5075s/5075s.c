@@ -183,20 +183,20 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 
 void keyboard_pre_init_kb(void) {
     // set our LED pings as output
-    setPinOutput(LED_MAC_OS_PIN);// LED2 MAC/WIN
-    writePinLow(LED_MAC_OS_PIN);
-    setPinOutput(LED_WIN_LOCK_PIN); // LED3 Win Lock
-    writePinLow(LED_WIN_LOCK_PIN);
+    gpio_set_pin_output(LED_MAC_OS_PIN);// LED2 MAC/WIN
+    gpio_write_pin_low(LED_MAC_OS_PIN);
+    gpio_set_pin_output(LED_WIN_LOCK_PIN); // LED3 Win Lock
+    gpio_write_pin_low(LED_WIN_LOCK_PIN);
 
     keyboard_pre_init_user();
 }
 
 void housekeeping_task_kb(void) {
-    writePin(LED_MAC_OS_PIN, 
+    gpio_write_pin(LED_MAC_OS_PIN, 
         (get_highest_layer(default_layer_state | layer_state) == 3) ||
         (get_highest_layer(default_layer_state | layer_state) == 4) ||
         (get_highest_layer(default_layer_state | layer_state) == 5));
-    writePin(LED_WIN_LOCK_PIN, keymap_config.no_gui);
+    gpio_write_pin(LED_WIN_LOCK_PIN, keymap_config.no_gui);
 }
 
 // bool dip_switch_update_kb(uint8_t index, bool active) {
