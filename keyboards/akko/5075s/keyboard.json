@@ -27,8 +27,6 @@
     },
     "features": {
         "bootmagic": true,
-        "command": false,
-        "console": false,
         "deferred_exec": true,
         "dip_switch": true,
         "encoder": true,
@@ -36,6 +34,14 @@
         "mousekey": true,
         "nkro": true,
         "rgb_matrix": true
+    },
+    "dynamic_keymap": {
+        "layer_count": 6
+    },
+    "host": {
+        "default": {
+            "nkro": true
+        }
     },
     "indicators": {
         "caps_lock": "A15"
@@ -181,7 +187,6 @@
     "url": "https://www.akkogear.com",
     "usb": {
         "device_version": "1.0.3",
-        "force_nkro": true,
         "pid": "0x000B",
         "suspend_wakeup_delay": 1000,
         "vid": "0xFFFE"
