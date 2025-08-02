@@ -89,3 +89,50 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
+static deferred_token enable_mac_layer_token = INVALID_DEFERRED_TOKEN;
+static int target_layer = 99;
+
+uint32_t enable_mac_layer(uint32_t trigger_time, void *cb_arg) {
+    set_single_default_layer(*((int *)cb_arg));
+    target_layer = 99;
+    return 0;
+}
+
+void switch_mac_layer(bool pressed, bool enable) {
+    if (pressed) {
+        target_layer = enable ? 3 : 0;
+        enable_mac_layer_token = defer_exec(1000, enable_mac_layer, &target_layer);
+    } else {
+        if (enable_mac_layer_token != INVALID_DEFERRED_TOKEN) {
+            cancel_deferred_exec(enable_mac_layer_token);
+        }
+    }
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case EN_MACL:
+            switch_mac_layer(record->event.pressed, true);
+            return false;
+        case DIS_MAC:
+            switch_mac_layer(record->event.pressed, false);
+            return false;
+        default:
+            return true; // Process all other keycodes normally
+    }
+}
+
+#if defined(OS_DETECTION_ENABLE)
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
+        case OS_MACOS:
+            set_single_default_layer(3);
+            break;
+        default:
+            set_single_default_layer(0);
+            break;
+    }
+
+    return true;
+}
+#endif

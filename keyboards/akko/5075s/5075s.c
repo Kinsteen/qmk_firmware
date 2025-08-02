@@ -148,39 +148,6 @@ const snled27351_led_t PROGMEM g_snled27351_leds[SNLED27351_LED_COUNT] = {
 #endif
 // clang-format on
 
-static deferred_token enable_mac_layer_token = INVALID_DEFERRED_TOKEN;
-static int target_layer = 99;
-
-uint32_t enable_mac_layer(uint32_t trigger_time, void *cb_arg) {
-    set_single_default_layer(*((int *)cb_arg));
-    target_layer = 99;
-    return 0;
-}
-
-void switch_mac_layer(bool pressed, bool enable) {
-    if (pressed) {
-        target_layer = enable ? 3 : 0;
-        enable_mac_layer_token = defer_exec(1000, enable_mac_layer, &target_layer);
-    } else {
-        if (enable_mac_layer_token != INVALID_DEFERRED_TOKEN) {
-            cancel_deferred_exec(enable_mac_layer_token);
-        }
-    }
-}
-
-bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case EN_MACL:
-            switch_mac_layer(record->event.pressed, true);
-            return false;
-        case DIS_MAC:
-            switch_mac_layer(record->event.pressed, false);
-            return false;
-        default:
-            return true; // Process all other keycodes normally
-    }
-}
-
 void keyboard_pre_init_kb(void) {
     // set our LED pings as output
     gpio_set_pin_output(LED_MAC_OS_PIN);// LED2 MAC/WIN
