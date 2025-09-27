@@ -124,13 +124,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 #if defined(OS_DETECTION_ENABLE)
 bool process_detected_host_os_user(os_variant_t detected_os) {
-    switch (detected_os) {
-        case OS_MACOS:
-            set_single_default_layer(3);
-            break;
-        default:
-            set_single_default_layer(0);
-            break;
+    /* If Apple, swap to macOS layer. */
+    if (detected_os == OS_MACOS || detected_os == OS_IOS) {
+        set_single_default_layer(3);
+    }
+    else /* Else use PC layer */ {
+        set_single_default_layer(0);
     }
 
     return true;
